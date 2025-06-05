@@ -22,6 +22,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({ message: 'Registration successful' });
   } catch (err) {
+    console.error('Register Error:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -29,8 +30,18 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { role, email, password } = req.body;
   try {
+    console.log('Login attempt for:', email, role);
+
     const user = await findUserByEmail(role, email);
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+    if (!user) {
+      console.log('User not found');
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    console.log('Password match:', match);
+
+    if (!match) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -40,20 +51,7 @@ exports.login = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
+    console.error('Login Error:', err);
     res.status(500).json({ error: err.message });
   }
 };
-
-console.log('Login attempt for:', email, role);
-
-if (!user) {
-  console.log('User not found');
-  return res.status(401).json({ error: 'Invalid credentials' });
-}
-
-const match = await bcrypt.compare(password, user.password_hash);
-console.log('Password match:', match);
-
-if (!match) {
-  return res.status(401).json({ error: 'Invalid credentials' });
-}
