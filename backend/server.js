@@ -1,25 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+// Load .env from root directory (one level up)
+require('dotenv').config({ path: '../.env' });
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const mysql = require('mysql2');
 
-// Serve static files from the frontend folder
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-// Optional: Serve index.html on root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
-// API Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/patients', require('./routes/patientRoutes'));
-app.use('/api/doctors', require('./routes/doctorRoutes'));
-app.use('/api/appointments', require('./routes/appointmentRoutes'));
+db.connect((err) => {
+  if (err) {
+    console.error('Database connection failed:', err.message);
+  } else {
+    console.log('Connected to MySQL');
+  }
+});
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+module.exports = db;
