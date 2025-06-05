@@ -1,22 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
 const verifyToken = require('../middleware/verifyToken');
+const DoctorController = require('../controllers/DoctorController');
 
-router.get('/profile', verifyToken, async (req, res) => {
-  const [rows] = await db.execute('SELECT * FROM doctors WHERE id = ?', [req.user.id]);
-  res.json(rows[0]);
-});
-
-router.get('/appointments', verifyToken, async (req, res) => {
-  const [rows] = await db.execute(
-    `SELECT a.*, p.first_name, p.last_name 
-     FROM appointments a 
-     JOIN patients p ON a.patient_id = p.id 
-     WHERE a.doctor_id = ?`,
-    [req.user.id]
-  );
-  res.json(rows);
-});
+router.get('/profile', verifyToken, DoctorController.getProfile);
+router.get('/appointments', verifyToken, DoctorController.getAppointments);
 
 module.exports = router;
