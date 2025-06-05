@@ -1,29 +1,21 @@
 const db = require('../config/database');
 
-const findUserByEmail = async (role, email) => {
-  const [rows] = await db.execute(
-    `SELECT * FROM ${role === 'patient' ? 'patients' : 'doctors'} WHERE email = ?`,
-    [email]
-  );
+exports.findUserByEmail = async (role, email) => {
+  const table = role === 'patient' ? 'patients' : 'doctors';
+  const [rows] = await db.execute(`SELECT * FROM ${table} WHERE email = ?`, [email]);
   return rows[0];
 };
 
-const createPatient = async (firstName, lastName, email, password) => {
+exports.createPatient = async (firstName, lastName, email, passwordHash) => {
   await db.execute(
     'INSERT INTO patients (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)',
-    [firstName, lastName, email, password]
+    [firstName, lastName, email, passwordHash]
   );
 };
 
-const createDoctor = async (name, email, password, specialization) => {
+exports.createDoctor = async (name, email, passwordHash, specialization) => {
   await db.execute(
     'INSERT INTO doctors (name, email, password_hash, specialization) VALUES (?, ?, ?, ?)',
-    [name, email, password, specialization]
+    [name, email, passwordHash, specialization]
   );
-};
-
-module.exports = {
-  findUserByEmail,
-  createPatient,
-  createDoctor
 };

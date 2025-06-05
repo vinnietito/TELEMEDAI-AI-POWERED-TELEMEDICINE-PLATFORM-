@@ -15,7 +15,7 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     if (role === 'patient') {
       const [firstName, lastName] = name.split(' ');
-      await createPatient(firstName, lastName, email, hashedPassword);
+      await createPatient(firstName, lastName || '', email, hashedPassword);
     } else {
       await createDoctor(name, email, hashedPassword, 'General');
     }
